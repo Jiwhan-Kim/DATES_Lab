@@ -1,3 +1,9 @@
+'''
+MobileNet v1
+Implemented by KimJW
+Please Do not Modify
+'''
+
 import torch.nn as nn
 
 
@@ -34,27 +40,26 @@ class MobileNet(nn.Module):
             )
         
         self.layer = nn.Sequential( # Input Matrix
-            conv_bn(3, 32, 1),      # 3   x w   x h
-            conv_dw(32, 64, 2),     # 32  x w   x h
-            conv_dw(64, 64, 1),     # 64  x w/2 x h/2
-            conv_dw(64, 128, 2),    # 64  x w/2 x h/2
-            conv_dw(128, 128, 1),   # 128 x w/4 x h/4
-            conv_dw(128, 256, 2),   # 128 x w/4 x h/4
-            conv_dw(256, 256, 1),   # 256 x w/8 x h/8
-            nn.AvgPool2d(1, 1)
+            conv_bn(3, 32, 1),      # 3   x w    x h
+            conv_dw(32, 64, 2),     # 32  x w    x h
+            conv_dw(64, 64, 1),     # 64  x w/2  x h/2
+            conv_dw(64, 128, 2),    # 64  x w/2  x h/2
+            conv_dw(128, 128, 1),   # 128 x w/4  x h/4
+            conv_dw(128, 256, 2),   # 128 x w/4  x h/4
+            conv_dw(256, 256, 2),   # 256 x w/8  x h/8
+            conv_dw(256, 256, 2),   # 256 x w/16 x h/16
+            # nn.AdaptiveMaxPool2d((1, 1))
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(4 * width * height, width * height),
-            nn.ReLU(),
-            nn.Linear(width * height, width * height // 4),
-            nn.ReLU(),
             nn.Linear(width * height // 4, 10)
         )
 
     def forward(self, x):
         x = self.layer(x)
+        print(x.shape)
         x = x.view(x.shape[0], -1)
+        print(x.shape)
         x = self.fc(x)
         return x
 
