@@ -56,16 +56,16 @@ def evaluate(loader, n_epoch):
 
 
 if __name__ == "__main__":
-    print("train.py")
+    print("running train.py")
     print("Training Mode")
     print("Device on Working: ", device)
 
-    model   = M.MobileNet().to(device)
+    model   = M.ResNet().to(device)
     trainer = T.AC_Trainer(0.001, model, device)
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
-    if path.exists("./model_params_MobileNet.pth"):
-        model.load_state_dict(torch.load("./model_params_MobileNet.pth"))
+    if path.exists("./model_params_ResNet.pth"):
+        model.load_state_dict(torch.load("./model_params_ResNet.pth"))
 
     for i in range(epoch):
         train(train_load, i)
@@ -92,5 +92,5 @@ if __name__ == "__main__":
         for i in range(10):
             print("class: {}: {} / 1000".format(i, val[i]))
 
-        torch.save(model.state_dict(), "model_params_MobileNet.pth")
+        torch.save(model.state_dict(), "model_params_ResNet.pth")
     
