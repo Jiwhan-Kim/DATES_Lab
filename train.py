@@ -57,11 +57,10 @@ def evaluate(loader, n_epoch):
 
 if __name__ == "__main__":
     print("running train.py")
-    print("Training Mode")
     print("Device on Working: ", device)
 
     model   = M.ResNet().to(device)
-    trainer = T.AC_Trainer(0.001, model, device)
+    trainer = T.SGDMC_Trainer(0.001, model, device)
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
     if path.exists("./model_params_ResNet.pth"):
