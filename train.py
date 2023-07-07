@@ -37,9 +37,6 @@ def train(loader, n_epoch):
     pbar = tqdm(loader)
     for image, label in pbar:
         x = image.to(device)
-        mean = torch.mean(x, dim=0)
-        std = torch.std(x, dim=0)
-        x = (x - mean) / std
         y = label.to(device)
         loss = trainer.step(x, y)
         loss_ret += loss
@@ -54,9 +51,6 @@ def evaluate(loader, n_epoch):
     result_pbar = tqdm(loader)
     for image, label in result_pbar:
         x = image.to(device)
-        mean = torch.mean(x, dim=0)
-        std = torch.std(x, dim=0)
-        x = (x - mean) / std
         y = label.to(device)
         output = model.forward(x)
         result = torch.argmax(output, dim=1)
@@ -95,9 +89,6 @@ if __name__ == "__main__":
         result_pbar = tqdm(test_load)
         for image, label in result_pbar:
             x = image.to(device)
-            mean = torch.mean(x, dim=0)
-            std = torch.std(x, dim=0)
-            x = (x - mean) / std
             y = label.to(device)
             output = model.forward(x)
             result = torch.argmax(output, dim=1)
