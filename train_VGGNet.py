@@ -25,7 +25,7 @@ else:
 
 # Global Data
 train_size = 40_000
-batch_size = 256
+batch_size = 64
 epoch      = 20
 
 
@@ -64,7 +64,11 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.VGGNet().to(device)
-    trainer = T.SGDMC_Trainer(0.01, model, device)
+    trainer = T.SGDMC_Trainer(0.001, model, device)
+
+    lr_patience = 5  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
+
+    no_improvement_count = 0  # 개선이 없는 에포크 카운트
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 

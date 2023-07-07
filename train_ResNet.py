@@ -30,7 +30,7 @@ else:
 # Global Data
 train_size = 40_000
 batch_size = 64
-epoch      = 30
+epoch      = 20
 
 
 def train(loader, n_epoch):
@@ -62,22 +62,22 @@ def evaluate(loader, n_epoch):
     return evaluatelosssum
 
 
-
 if __name__ == "__main__":
     print("running train.py")
     print("Device on Working: ", device)
     torch.cuda.empty_cache()
     model   = M.ResNet().to(device)
-    trainer = T.SGDMC_Trainer(0.002, model, device)
+    trainer = T.SGDMC_Trainer(0.001, model, device)
 
-    lr_patience = 5  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
+    patience = 5  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
 
     no_improvement_count = 0  # 개선이 없는 에포크 카운트
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
-    if path.exists("./model_params_ResNet.pth"):
-        model.load_state_dict(torch.load("./model_params_ResNet.pth"))
+    """if path.exists("./model_params_ResNet.pth"):
+        model.load_state_dict(torch.load("./model_params_ResNet.pth"))"""
+
 
     for i in range(epoch):
         train(train_load, i)
@@ -92,12 +92,15 @@ if __name__ == "__main__":
           else:
             no_improvement_count = 0
             best_eval_loss = loss_return
-        if no_improvement_count >= lr_patience:
-            trainer.lr = trainer.lr / 10
+            torch.save(model.state_dict(), 'model_params_ResNet.pth')
+        if no_improvement_count >= patience:
             no_improvement_count = 0
-            print("LR decrease")
+            print("no improvement")
+            break
+
 
     with torch.no_grad():
+        model.load_state_dict(torch.load("./model_params_ResNet.pth"))
         model.eval()
         val = np.zeros(10, dtype=int)
         correct = 0
@@ -118,5 +121,4 @@ if __name__ == "__main__":
         for i in range(10):
             print("class: {}: {} / 1000".format(i, val[i]))
 
-        torch.save(model.state_dict(), "model_params_ResNet.pth")
     
