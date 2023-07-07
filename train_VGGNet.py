@@ -61,7 +61,7 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.VGGNet().to(device)
-    trainer = T.AC_Trainer(0.001, model, device)
+    trainer = T.SGDMC_Trainer(0.01, model, device)
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 

@@ -50,9 +50,11 @@ def evaluate(loader, n_epoch):
         x = image.to(device)
         y = label.to(device)
         output = model.forward(x)
+        evaluateloss = nn.CrossEntropyLoss(output, y)
         result = torch.argmax(output, dim=1)
         correct += batch_size - torch.count_nonzero(result - y)
     print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+    return loss
 
 
 
@@ -61,17 +63,21 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.ResNet().to(device)
-    trainer = T.AC_Trainer(0.001, model, device)
+    trainer = T.SGDMC_Trainer(0.1, model, device)
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
     if path.exists("./model_params_ResNet.pth"):
         model.load_state_dict(torch.load("./model_params_ResNet.pth"))
 
+    prev = np.zeros(epoch, dtype=float)
     for i in range(epoch):
         train(train_load, i)
         evaluate(valid_load, i)
-
+        prev[i] = loss_ret
+        if i >= 2 and (prev[i] + prev[i - 2]) > (2 * prev[i - 1]):
+            print("LR Lowered!")
+            trainer.lr = trainer.lr * 0.5
 
     with torch.no_grad():
         model.eval()
