@@ -44,17 +44,18 @@ def train(loader, n_epoch):
 def evaluate(loader, n_epoch):
     correct = 0
     model.eval()
-
+    evaluateloss = 0
     result_pbar = tqdm(loader)
     for image, label in result_pbar:
         x = image.to(device)
         y = label.to(device)
         output = model.forward(x)
-        evaluateloss = nn.CrossEntropyLoss(output, y)
+        evaluateloss = evaluateloss + nn.CrossEntropyLoss(output, y)
         result = torch.argmax(output, dim=1)
         correct += batch_size - torch.count_nonzero(result - y)
+    evaluateloss = evaluateloss / len(loader)
     print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
-    return loss
+    return evaluateloss
 
 
 
@@ -65,6 +66,11 @@ if __name__ == "__main__":
     model   = M.ResNet().to(device)
     trainer = T.SGDMC_Trainer(0.1, model, device)
 
+    best_eval_loss = float('inf')
+    lr_patience = 3  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
+
+    no_improvement_count = 0  # 개선이 없는 에포크 카운트
+
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
     if path.exists("./model_params_ResNet.pth"):
@@ -73,11 +79,15 @@ if __name__ == "__main__":
     prev = np.zeros(epoch, dtype=float)
     for i in range(epoch):
         train(train_load, i)
-        evaluate(valid_load, i)
-        prev[i] = loss_ret
-        if i >= 2 and (prev[i] + prev[i - 2]) > (2 * prev[i - 1]):
-            print("LR Lowered!")
-            trainer.lr = trainer.lr * 0.5
+        loss_return = evaluate(valid_load, i)
+        if loss_return >= best_eval_loss:
+            no_improvement_count += 1
+        else:
+            no_improvement_count = 0
+            best_eval_loss = loss_return
+        if no_improvement_count >= lr_patience:
+            trainer.lr = trainer.lr / 10
+            print("LR decrease")
 
     with torch.no_grad():
         model.eval()
