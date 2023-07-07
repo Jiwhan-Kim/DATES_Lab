@@ -62,7 +62,6 @@ class VGGNet(nn.Module):
     def forward(self, x):
 
         x = self.layer(x)
-        print(x.size())
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
         return x
