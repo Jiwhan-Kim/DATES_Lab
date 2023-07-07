@@ -26,11 +26,10 @@ else:
 # Global Data
 train_size = 40_000
 batch_size = 256
-epoch      = 10
+epoch      = 30
 
 
 def train(loader, n_epoch):
-    loss_ret = 0
     loss = 0
     model.train()
 
@@ -39,10 +38,8 @@ def train(loader, n_epoch):
         x = image.to(device)
         y = label.to(device)
         loss = trainer.step(x, y)
-        loss_ret += loss
         pbar.set_description("Training Epoch %3d, %2.6f" % (n_epoch, loss))
 
-    return loss_ret
 
 def evaluate(loader, n_epoch):
     correct = 0
@@ -56,6 +53,7 @@ def evaluate(loader, n_epoch):
         result = torch.argmax(output, dim=1)
         correct += batch_size - torch.count_nonzero(result - y)
     print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+    return correct
 
 
 
@@ -64,7 +62,7 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.MobileResNet().to(device)
-    trainer = T.AC_Trainer(0.0008, model, device)
+    trainer = T.AC_Trainer(0.01, model, device)
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
@@ -72,9 +70,18 @@ if __name__ == "__main__":
     if path.exists("./model_params_MobileResNet.pth"):
         model.load_state_dict(torch.load("./model_params_MobileResNet.pth"))
 
+    prev = np.zeros(epoch, dtype=int)
     for i in range(epoch):
         train(train_load, i)
-        evaluate(valid_load, i)
+        correct = evaluate(valid_load, i)
+
+        prev[i] = correct
+        if i >= 2 and (prev[i] + prev[i - 2]) < (2 * prev[i - 1]):
+            print("LR Lowered!")
+            trainer.lr = trainer.lr * 0.8
+        elif i >= 2:
+            print("LR Doubled!")
+            trainer.lr = trainer.lr * 1.4
 
     with torch.no_grad():
         model.eval()
