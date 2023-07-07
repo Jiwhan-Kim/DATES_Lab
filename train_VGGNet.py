@@ -43,16 +43,19 @@ def train(loader, n_epoch):
 
 def evaluate(loader, n_epoch):
     correct = 0
-    model.eval()
-
-    result_pbar = tqdm(loader)
-    for image, label in result_pbar:
-        x = image.to(device)
-        y = label.to(device)
-        output = model.forward(x)
-        result = torch.argmax(output, dim=1)
-        correct += batch_size - torch.count_nonzero(result - y)
-    print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+    with torch.no_grad():
+      model.eval()
+      evaluatelosssum = 0
+      result_pbar = tqdm(loader)
+      for image, label in result_pbar:
+          x = image.to(device)
+          y = label.to(device)
+          output = model.forward(x)
+          evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
+          result = torch.argmax(output, dim=1)
+          correct += batch_size - torch.count_nonzero(result - y)
+      print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+    return evaluatelosssum
 
 
 
@@ -70,7 +73,21 @@ if __name__ == "__main__":
 
     for i in range(epoch):
         train(train_load, i)
-        evaluate(valid_load, i)
+        loss_return = evaluate(valid_load, i)
+        if i==0:
+          no_improvement_count = 0
+          best_eval_loss = loss_return
+          
+        else:
+          if loss_return >= best_eval_loss:
+            no_improvement_count += 1
+          else:
+            no_improvement_count = 0
+            best_eval_loss = loss_return
+        if no_improvement_count >= lr_patience:
+            trainer.lr = trainer.lr / 10
+            no_improvement_count = 0
+            print("LR decrease")
 
 
     with torch.no_grad():
