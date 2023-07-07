@@ -26,10 +26,11 @@ else:
 # Global Data
 train_size = 40_000
 batch_size = 256
-epoch      = 20
+epoch      = 30
 
 
 def train(loader, n_epoch):
+    loss_ret = 0
     loss = 0
     model.train()
 
@@ -41,7 +42,10 @@ def train(loader, n_epoch):
         x = (x - mean) / std
         y = label.to(device)
         loss = trainer.step(x, y)
+        loss_ret += loss
         pbar.set_description("Training Epoch %3d, %2.6f" % (n_epoch, loss))
+
+    return loss_ret
 
 def evaluate(loader, n_epoch):
     correct = 0
@@ -67,14 +71,21 @@ if __name__ == "__main__":
 
     model   = M.ResNet().to(device)
     trainer = T.AC_Trainer(0.001, model, device)
+
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
     if path.exists("./model_params_ResNet.pth"):
         model.load_state_dict(torch.load("./model_params_ResNet.pth"))
 
+    prev = np.zeros(epoch, dtype=float)
     for i in range(epoch):
-        train(train_load, i)
+        loss_ret = train(train_load, i)
         evaluate(valid_load, i)
+
+        prev[i] = loss_ret
+        if i >= 2 and (prev[i] + prev[i - 2]) > (2 * prev[i - 1]):
+            print("LR Lowered!")
+            trainer.lr = trainer.lr * 0.5
 
     with torch.no_grad():
         model.eval()

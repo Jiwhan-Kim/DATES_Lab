@@ -1,3 +1,9 @@
+'''
+MobileNet v1
+Implemented by KimJW
+Please Do not Modify
+'''
+
 import torch.nn as nn
 
 
@@ -41,15 +47,12 @@ class MobileNet(nn.Module):
             conv_dw(128, 128, 1),   # 128 x w/4 x h/4
             conv_dw(128, 256, 2),   # 128 x w/4 x h/4
             conv_dw(256, 256, 1),   # 256 x w/8 x h/8
-            nn.AvgPool2d(1, 1)
+            conv_dw(256, 512, 2),   # 256 x w/8 x h/8
+            nn.AdaptiveMaxPool2d(2)
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(4 * width * height, width * height),
-            nn.ReLU(),
-            nn.Linear(width * height, width * height // 4),
-            nn.ReLU(),
-            nn.Linear(width * height // 4, 10)
+            nn.Linear(2 * width * height, 10)
         )
 
     def forward(self, x):
