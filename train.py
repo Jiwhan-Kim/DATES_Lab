@@ -36,6 +36,9 @@ def train(loader, n_epoch):
     pbar = tqdm(loader)
     for image, label in pbar:
         x = image.to(device)
+        mean = torch.mean(x, dim=0)
+        std = torch.std(x, dim=0)
+        x = (x - mean) / std
         y = label.to(device)
         loss = trainer.step(x, y)
         pbar.set_description("Training Epoch %3d, %2.6f" % (n_epoch, loss))
@@ -47,6 +50,9 @@ def evaluate(loader, n_epoch):
     result_pbar = tqdm(loader)
     for image, label in result_pbar:
         x = image.to(device)
+        mean = torch.mean(x, dim=0)
+        std = torch.std(x, dim=0)
+        x = (x - mean) / std
         y = label.to(device)
         output = model.forward(x)
         result = torch.argmax(output, dim=1)
@@ -60,7 +66,7 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.ResNet().to(device)
-    trainer = T.SGDMC_Trainer(0.001, model, device)
+    trainer = T.AC_Trainer(0.001, model, device)
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
     if path.exists("./model_params_ResNet.pth"):
@@ -78,6 +84,9 @@ if __name__ == "__main__":
         result_pbar = tqdm(test_load)
         for image, label in result_pbar:
             x = image.to(device)
+            mean = torch.mean(x, dim=0)
+            std = torch.std(x, dim=0)
+            x = (x - mean) / std
             y = label.to(device)
             output = model.forward(x)
             result = torch.argmax(output, dim=1)
