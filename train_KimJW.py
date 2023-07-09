@@ -24,9 +24,9 @@ else:
     device = "cpu"
 
 # Global Data
-train_size = 40_000
+train_size = 49_000
 batch_size = 256
-epoch      = 30
+epoch      = 10
 
 
 def train(loader, n_epoch):
@@ -52,7 +52,7 @@ def evaluate(loader, n_epoch):
         output = model.forward(x)
         result = torch.argmax(output, dim=1)
         correct += batch_size - torch.count_nonzero(result - y)
-    print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+    print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 1000))
     return correct
 
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.MobileResNet().to(device)
-    trainer = T.AC_Trainer(0.01, model, device)
+    trainer = T.AC_Trainer(0.03, model, device)
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 

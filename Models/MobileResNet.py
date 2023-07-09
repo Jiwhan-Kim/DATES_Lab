@@ -60,16 +60,17 @@ class MobileResNet(nn.Module):
             nn.MaxPool2d(2, 2),
             self.make_layer(64, 64, 1),     # 64  x w/2  x h/2
             self.make_layer(64, 64, 1),
-            self.make_layer(64, 64, 1),
             self.make_layer(64, 128, 2),    # 64  x w/2  x h/2
             self.make_layer(128, 128, 1),   # 128 x w/4  x h/4
-            self.make_layer(128, 128, 1),
-            self.make_layer(128, 128, 1),
-            self.make_layer(128, 256, 2),   # 128 x w/4 x h/4
-            nn.MaxPool2d(2, 2)              # 256 x w/8 x h/8
+            self.make_layer(128, 256, 2),   # 128 x w/4  x h/4
+            self.make_layer(256, 256, 1),   # 256 x w/8  x w/8
+            self.make_layer(256, 256, 1),
+            self.make_layer(256, 512, 2),   # 256 x w/8  x w/8
+            self.make_layer(512, 512, 1),   # 512 x w/16 x h/16
+            nn.AdaptiveAvgPool2d(1)         # 256 x w/8 x h/8
         )
 
-        self.fc = nn.Linear(1024, 10)
+        self.fc = nn.Linear(512, 10)
 
 
     def make_layer(self, in_channels, out_channels, stride):
