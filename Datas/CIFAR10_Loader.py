@@ -12,8 +12,12 @@ transform = transforms.Compose(
 class MyDataset(Dataset):
     def __init__(self, data, label):
         self.x = torch.tensor(data / 256., dtype=torch.float).permute(0, 3, 1, 2)
-        self.x -= 0.5
-        self.x /= 0.5
+        self.x[:, 0] -= 0.4914
+        self.x[:, 1] -= 0.4822
+        self.x[:, 2] -= 0.4465
+        self.x[:, 0] /= 0.247
+        self.x[:, 1] /= 0.243
+        self.x[:, 2] /= 0.261
         self.y = torch.tensor(label, dtype=torch.long)
 
     def __len__(self):

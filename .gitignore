@@ -162,6 +162,7 @@ cython_debug/
 # Model Parameters
 *.pth
 /Datas/cifar-10-batches-py/
+cifar-10-python.tar.gz
 
 # Apple Issue
 **/.DS_Store
