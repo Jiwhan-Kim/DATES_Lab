@@ -56,7 +56,7 @@ def evaluate(loader, n_epoch):
           evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
           result = torch.argmax(output, dim=1)
           correct += batch_size - torch.count_nonzero(result - y)
-      print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+      print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / (50000 - train_size)))
     return evaluatelosssum
 
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.VGGNet().to(device)
-    trainer = T.SGDMC_Trainer(0.01, model, device)
+    trainer = T.SGDMC_Trainer_VGGNet(0.01, model, device)
 
     patience = 3  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
 
