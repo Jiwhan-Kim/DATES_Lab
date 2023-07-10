@@ -1,4 +1,6 @@
 import torch.nn as nn
+import torch as torch
+
 class BasicBlock(nn.Module):
     def __init__(self, in_channels, out1x1, reduce3x3, out3x3, reduce5x5, out5x5, out1x1pool):
         super(BasicBlock, self).__init__()
@@ -40,45 +42,59 @@ class BasicBlock(nn.Module):
         
         outputs = [branch1x1, branch3x3, branch5x5, branchpool]
         return torch.cat(outputs, 1)
-class Inception(nn.Module):
+
+class Inception_Jun(nn.Module):
     def __init__(self):
-        super(ResNet, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(64)
+        super(Inception_Jun, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=7, stride=2, padding=3)
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=1, stride=1)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=192, kernel_size=3, stride=1, padding=1)
 
-        self.layer1 = self.make_layer(64, 64, 1) # first block stride 1
-        self.layer2 = self.make_layer(64, 128, 2)
-        self.layer3 = self.make_layer(128, 256, 2)
-        self.layer4 = self.make_layer(256, 512, 2)
+        self.layer3a = BasicBlock(in_channels=192, out1x1=64, reduce3x3=96, out3x3=128, reduce5x5=16, out5x5=32, out1x1pool=32) # 3a
+        self.layer3b = BasicBlock(in_channels=256, out1x1=128, reduce3x3=128, out3x3=192, reduce5x5=32, out5x5=96, out1x1pool=64) # 3b
 
-        self.fc = nn.Linear(1*1*512, 10)
-        # Initialize the weights using Kaiming initialization for the fully connected layer
-        nn.init.kaiming_uniform_(self.fc.weight, mode='fan_in', nonlinearity='relu')
+        self.layer4a = BasicBlock(in_channels=480, out1x1=192, reduce3x3=96, out3x3=208, reduce5x5=16, out5x5=48, out1x1pool=64) # 4a
+        self.layer4b = BasicBlock(in_channels=512, out1x1=160, reduce3x3=112, out3x3=224, reduce5x5=24, out5x5=64, out1x1pool=64) # 4b
+        self.layer4c = BasicBlock(in_channels=512, out1x1=128, reduce3x3=128, out3x3=256, reduce5x5=24, out5x5=64, out1x1pool=64) # 4c
+        self.layer4d = BasicBlock(in_channels=512, out1x1=112, reduce3x3=144, out3x3=288, reduce5x5=32, out5x5=64, out1x1pool=64) # 4d
+        self.layer4e = BasicBlock(in_channels=528, out1x1=256, reduce3x3=160, out3x3=320, reduce5x5=32, out5x5=128, out1x1pool=128) # 4e
+
+        self.layer5a = BasicBlock(in_channels=832, out1x1=256, reduce3x3=160, out3x3=320, reduce5x5=32, out5x5=128, out1x1pool=128) # 4d
+        self.layer5b = BasicBlock(in_channels=832, out1x1=384, reduce3x3=192, out3x3=384, reduce5x5=48, out5x5=128, out1x1pool=128) # 4e
 
 
-    def make_layer(self, in_channels, out_channels, stride):
-        layers=[]
-        if stride == 1:
-            layers.append(BasicBlock(in_channels, out_channels, 1))
-            layers.append(BasicBlock(out_channels, out_channels, 1))
-        elif stride == 2:
-            layers.append(BasicBlock(in_channels, out_channels, 2))
-            layers.append(BasicBlock(out_channels, out_channels, 1))
-        return nn.Sequential(*layers)
+        self.fc = nn.Linear(1*1*1024, 10)
+
+
+
 
     def forward(self, x):
         x = self.conv1(x)
-        
-        x = self.bn1(x)
         x = nn.ReLU()(x)
-        x = nn.MaxPool2d(2, 2)(x)
+        x = nn.MaxPool2d((3, 3), stride=2, padding=1)(x)
+        x = nn.LocalResponseNorm(64)(x)
 
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
+        x = self.conv2(x)
+        x = nn.ReLU()(x)
+        x = self.conv3(x)
+        x = nn.ReLU()(x)
+        x = nn.LocalResponseNorm(192)(x)
+        x = nn.MaxPool2d((3, 3), stride=2, padding=1)(x)
 
-        x = nn.MaxPool2d(2, 2)(x)
+        x = self.layer3a(x)
+        x = self.layer3b(x)
+        x = nn.MaxPool2d((3, 3), stride=2, padding=1)(x)
+
+        x = self.layer4a(x)
+        x = self.layer4b(x)
+        x = self.layer4c(x)
+        x = self.layer4d(x)
+        x = self.layer4e(x)
+        x = nn.MaxPool2d((3, 3), stride=2, padding=1)(x)
+
+        x = self.layer5a(x)
+        x = self.layer5b(x)
+        x = nn.Dropout(0.4)(x)
 
         x = x.view(x.shape[0], -1)
         x = self.fc(x)

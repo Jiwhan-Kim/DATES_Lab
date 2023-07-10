@@ -14,10 +14,7 @@ class BasicBlock(nn.Module):
                 nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1, stride=stride, padding=0, bias=False),
                 nn.BatchNorm2d(out_channels)
             )
-        # Initialize the weights using Kaiming initialization
-        for m in self.modules():
-          if isinstance(m, nn.Conv2d):
-            nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+
 
     def forward(self, x):
         residual = x
