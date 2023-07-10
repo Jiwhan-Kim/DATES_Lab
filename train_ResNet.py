@@ -30,13 +30,12 @@ else:
 # Global Data
 train_size = 40_000
 batch_size = 64
-epoch      = 20
+epoch      = 100
 
 
 def train(loader, n_epoch):
     loss = 0
     model.train()
-
     pbar = tqdm(loader)
     for image, label in pbar:
         x = image.to(device)
@@ -46,19 +45,21 @@ def train(loader, n_epoch):
 
 
 def evaluate(loader, n_epoch):
-    correct = 0
     with torch.no_grad():
-      model.eval()
-      evaluatelosssum = 0
-      result_pbar = tqdm(loader)
-      for image, label in result_pbar:
-          x = image.to(device)
-          y = label.to(device)
-          output = model.forward(x)
-          evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
-          result = torch.argmax(output, dim=1)
-          correct += batch_size - torch.count_nonzero(result - y)
-      print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+        correct = 0
+        model.eval()
+        evaluatelosssum = 0
+        result_pbar = tqdm(loader)
+        for image, label in result_pbar:
+            x = image.to(device)
+            y = label.to(device)
+            output = model.forward(x)
+            evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
+            result = torch.argmax(output, dim=1)
+            for res, ans in zip(result, y):
+                if res == ans:
+                    correct += 1
+        print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / (50000 - train_size)))
     return evaluatelosssum
 
 
@@ -67,16 +68,17 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
     torch.cuda.empty_cache()
     model   = M.ResNet().to(device)
-    trainer = T.SGDMC_Trainer(0.001, model, device)
-
-    patience = 5  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
+    trainer = T.SGDMC_Trainer(0.01, model, device)
+ 
+    patience = 3  # loss가 일정 에포크 동안 감소하지 않으면 lr decrease
+    
 
     no_improvement_count = 0  # 개선이 없는 에포크 카운트
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
-    """if path.exists("./model_params_ResNet.pth"):
-        model.load_state_dict(torch.load("./model_params_ResNet.pth"))"""
+    if path.exists("./model_params_ResNet.pth"):
+        model.load_state_dict(torch.load("./model_params_ResNet.pth"))
 
 
     for i in range(epoch):
@@ -85,6 +87,7 @@ if __name__ == "__main__":
         if i==0:
           no_improvement_count = 0
           best_eval_loss = loss_return
+          torch.save(model.state_dict(), 'model_params_ResNet.pth')
           
         else:
           if loss_return >= best_eval_loss:
@@ -93,11 +96,15 @@ if __name__ == "__main__":
             no_improvement_count = 0
             best_eval_loss = loss_return
             torch.save(model.state_dict(), 'model_params_ResNet.pth')
-        if no_improvement_count >= patience:
+        if no_improvement_count >= patience and trainer.lr > 0.001:
+            no_improvement_count = 0
+            trainer.lr = trainer.lr / 10
+            model.load_state_dict(torch.load("./model_params_ResNet.pth")) # take best one
+            print("LR decreased")
+        elif no_improvement_count >= patience and trainer.lr == 0.001:
             no_improvement_count = 0
             print("no improvement")
             break
-
 
     with torch.no_grad():
         model.load_state_dict(torch.load("./model_params_ResNet.pth"))
@@ -119,6 +126,6 @@ if __name__ == "__main__":
         
         print("Final Accuracy: {}\n\n".format(100 * correct / 10000))
         for i in range(10):
-            print("class: {}: {} / 1000".format(i, val[i]))
+            print("class {}: {} / 1000".format(i, val[i]))
 
     

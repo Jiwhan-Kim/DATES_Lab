@@ -4,24 +4,13 @@ from torchvision import transforms, datasets
 
 transform = transforms.Compose(
     [transforms.ToTensor(),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
      ]
 )
 
 
-class MyDataset(Dataset):
-    def __init__(self, data, label):
-        self.x = torch.tensor(data, dtype=torch.float)
-        self.y = torch.tensor(label, dtype=torch.long)
 
-    def __len__(self):
-        return self.x.shape[0]
-
-    def __getitem__(self, index):
-        return self.x[index], self.y[index]
-
-
-def Load_CIFAR10(n_train=40000, batch_size=1):
+def Load_CIFAR10(n_train, batch_size):
     # Data Sets
     trainset = datasets.CIFAR10(root='./Datas', train=True, download=True, transform=transform)
     testset = datasets.CIFAR10(root='./Datas', train=False, download=True, transform=transform)

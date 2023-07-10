@@ -26,7 +26,7 @@ else:
 # Global Data
 train_size = 40_000
 batch_size = 64
-epoch      = 20
+epoch      = 100
 
 
 def train(loader, n_epoch):
@@ -36,6 +36,7 @@ def train(loader, n_epoch):
     pbar = tqdm(loader)
     for image, label in pbar:
         x = image.to(device)
+        x = x - torch.mean(x)
         y = label.to(device)
         loss = trainer.step(x, y)
         pbar.set_description("Training Epoch %3d, %2.6f" % (n_epoch, loss))
@@ -49,6 +50,7 @@ def evaluate(loader, n_epoch):
       result_pbar = tqdm(loader)
       for image, label in result_pbar:
           x = image.to(device)
+          x = x - torch.mean(x)
           y = label.to(device)
           output = model.forward(x)
           evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
@@ -64,9 +66,9 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.VGGNet().to(device)
-    trainer = T.SGDMC_Trainer(0.001, model, device)
+    trainer = T.SGDMC_Trainer(0.01, model, device)
 
-    lr_patience = 5  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
+    patience = 3  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
 
     no_improvement_count = 0  # 개선이 없는 에포크 카운트
 
@@ -81,6 +83,7 @@ if __name__ == "__main__":
         if i==0:
           no_improvement_count = 0
           best_eval_loss = loss_return
+          torch.save(model.state_dict(), 'model_params_VGGNet.pth')
           
         else:
           if loss_return >= best_eval_loss:
@@ -88,10 +91,16 @@ if __name__ == "__main__":
           else:
             no_improvement_count = 0
             best_eval_loss = loss_return
-        if no_improvement_count >= lr_patience:
-            trainer.lr = trainer.lr / 10
+            torch.save(model.state_dict(), 'model_params_VGGNet.pth')
+        if no_improvement_count >= patience and trainer.lr > 0.001:
             no_improvement_count = 0
-            print("LR decrease")
+            trainer.lr = trainer.lr / 10
+            model.load_state_dict(torch.load("./model_params_VGGNet.pth")) # take best one
+            print("LR decreased")
+        elif no_improvement_count >= patience and trainer.lr == 0.001:
+            no_improvement_count = 0
+            print("no improvement")
+            break
 
 
     with torch.no_grad():
@@ -102,6 +111,7 @@ if __name__ == "__main__":
         result_pbar = tqdm(test_load)
         for image, label in result_pbar:
             x = image.to(device)
+            x = x - torch.mean(x)
             y = label.to(device)
             output = model.forward(x)
             result = torch.argmax(output, dim=1)
