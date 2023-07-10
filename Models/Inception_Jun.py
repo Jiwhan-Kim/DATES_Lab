@@ -1,40 +1,46 @@
 import torch.nn as nn
 class BasicBlock(nn.Module):
-
-    def __init__(self, in_channels, out_channels, stride):
+    def __init__(self, in_channels, out1x1, reduce3x3, out3x3, reduce5x5, out5x5, out1x1pool):
         super(BasicBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=stride, padding=1, bias=False) # stride = 1 or 2
-        self.bn1 = nn.BatchNorm2d(out_channels)
-        self.conv2 = nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn2 = nn.BatchNorm2d(out_channels)
-
-        self.shortcut = nn.Sequential()
-        if stride != 1:
-            self.shortcut = nn.Sequential(
-                nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1, stride=stride, padding=0, bias=False),
-                nn.BatchNorm2d(out_channels)
-            )
-        # Initialize the weights using Kaiming initialization
-        for m in self.modules():
-          if isinstance(m, nn.Conv2d):
-            nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
-
+        
+        # 1x1 컨볼루션 브랜치
+        self.branch1x1 = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels, out_channels=out1x1, kernel_size=1),
+            nn.ReLU()
+        )
+        
+        # 3x3 컨볼루션 브랜치
+        self.branch3x3 = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels, out_channels=reduce3x3, kernel_size=1),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=reduce3x3, out_channels=out3x3, kernel_size=3, padding=1),
+            nn.ReLU()
+        )
+        
+        # 5x5 컨볼루션 브랜치
+        self.branch5x5 = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels, out_channels=reduce5x5, kernel_size=1),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=reduce5x5, out_channels=out5x5, kernel_size=5, padding=2),
+            nn.ReLU()
+        )
+        
+        # 폴링 브랜치
+        self.branchpool = nn.Sequential(
+            nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=in_channels, out_channels=out1x1pool, kernel_size=1),
+            nn.ReLU()
+        )
+    
     def forward(self, x):
-        residual = x
-
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = nn.ReLU()(out)
-
-        out = self.conv2(out)
-        out = self.bn2(out)
-
-        out = out + self.shortcut(residual)
-        out = nn.ReLU()(out)
-
-        return out
-
-class ResNet(nn.Module):
+        branch1x1 = self.branch1x1(x)
+        branch3x3 = self.branch3x3(x)
+        branch5x5 = self.branch5x5(x)
+        branchpool = self.branchpool(x)
+        
+        outputs = [branch1x1, branch3x3, branch5x5, branchpool]
+        return torch.cat(outputs, 1)
+class Inception(nn.Module):
     def __init__(self):
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1, bias=False)
