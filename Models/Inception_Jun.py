@@ -59,8 +59,8 @@ class Inception_Jun(nn.Module):
         self.layer4d = BasicBlock(in_channels=512, out1x1=112, reduce3x3=144, out3x3=288, reduce5x5=32, out5x5=64, out1x1pool=64) # 4d
         self.layer4e = BasicBlock(in_channels=528, out1x1=256, reduce3x3=160, out3x3=320, reduce5x5=32, out5x5=128, out1x1pool=128) # 4e
 
-        self.layer5a = BasicBlock(in_channels=832, out1x1=256, reduce3x3=160, out3x3=320, reduce5x5=32, out5x5=128, out1x1pool=128) # 4d
-        self.layer5b = BasicBlock(in_channels=832, out1x1=384, reduce3x3=192, out3x3=384, reduce5x5=48, out5x5=128, out1x1pool=128) # 4e
+        self.layer5a = BasicBlock(in_channels=832, out1x1=256, reduce3x3=160, out3x3=320, reduce5x5=32, out5x5=128, out1x1pool=128) # 5a
+        self.layer5b = BasicBlock(in_channels=832, out1x1=384, reduce3x3=192, out3x3=384, reduce5x5=48, out5x5=128, out1x1pool=128) # 5b
 
 
         self.fc = nn.Linear(1*1*1024, 10)
