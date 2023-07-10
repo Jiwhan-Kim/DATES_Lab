@@ -60,8 +60,8 @@ class VGGNet(nn.Module):
         )
 
         for m in self.modules():
-            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
-                nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+             if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+                 nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
 
     def forward(self, x):
 
