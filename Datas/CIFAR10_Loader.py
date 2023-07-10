@@ -1,44 +1,21 @@
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import transforms, datasets
 
 transform = transforms.Compose(
     [transforms.ToTensor(),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
      ]
 )
 
 
-class MyDataset(Dataset):
-    def __init__(self, data, label):
-        self.x = torch.tensor(data / 256., dtype=torch.float).permute(0, 3, 1, 2)
-        self.x -= 0.5
-        self.x /= 0.5
-        self.y = torch.tensor(label, dtype=torch.long)
 
-    def __len__(self):
-        return self.x.shape[0]
-
-    def __getitem__(self, index):
-        return self.x[index], self.y[index]
-
-
-def Load_CIFAR10(n_train=40000, batch_size=1):
+def Load_CIFAR10(n_train, batch_size):
     # Data Sets
-    trainset = datasets.CIFAR10(root='./Datas', train=True, download=True)
+    trainset = datasets.CIFAR10(root='./Datas', train=True, download=True, transform=transform)
     testset = datasets.CIFAR10(root='./Datas', train=False, download=True, transform=transform)
-
-    datas = trainset.data
-    labels = trainset.targets
-
-    train_datas = datas[:n_train]
-    valid_datas = datas[n_train:]
-
-    train_labels = labels[:n_train]
-    valid_labels = labels[n_train:]
-
-    train_ds = MyDataset(data=train_datas, label=train_labels)
-    valid_ds = MyDataset(data=valid_datas, label=valid_labels)
+    n_eval = 50000 - n_train
+    train_ds, valid_ds = random_split(trainset, [n_train, n_eval])
 
     train_load = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     valid_load = DataLoader(valid_ds, batch_size=batch_size, shuffle=False)

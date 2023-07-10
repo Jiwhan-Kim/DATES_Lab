@@ -59,10 +59,13 @@ class VGGNet(nn.Module):
           nn.Linear(256, 10)
         )
 
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+                nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+
     def forward(self, x):
 
         x = self.layer(x)
-        print(x.size())
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
         return x
