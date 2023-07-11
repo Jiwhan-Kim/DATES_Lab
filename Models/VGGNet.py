@@ -8,26 +8,26 @@ class VGGNet(nn.Module):
         def conv_2times(in_channels, out_channels):
             return nn.Sequential(
                 nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                #nn.BatchNorm2d(out_channels),
+                nn.BatchNorm2d(out_channels),
                 nn.ReLU(),
 
                 nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                #nn.BatchNorm2d(out_channels),
+                nn.BatchNorm2d(out_channels),
                 nn.ReLU()
             )
         
         def conv_3times(in_channels, out_channels):
             return nn.Sequential(
                 nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                #nn.BatchNorm2d(out_channels),
+                nn.BatchNorm2d(out_channels),
                 nn.ReLU(),
 
                 nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                #nn.BatchNorm2d(out_channels),
+                nn.BatchNorm2d(out_channels),
                 nn.ReLU(),
 
                 nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                #nn.BatchNorm2d(out_channels),
+                nn.BatchNorm2d(out_channels),
                 nn.ReLU()
             )
 

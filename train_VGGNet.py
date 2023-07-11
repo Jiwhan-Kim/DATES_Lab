@@ -31,7 +31,8 @@ epoch      = 100
 
 def train(loader, n_epoch):
     loss = 0
-    model.train() 
+    model.train()
+
     pbar = tqdm(loader)
     for image, label in pbar:
         x = image.to(device)
@@ -55,7 +56,7 @@ def evaluate(loader, n_epoch):
           evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
           result = torch.argmax(output, dim=1)
           correct += batch_size - torch.count_nonzero(result - y)
-      print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+      print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / (50000 - train_size)))
     return evaluatelosssum
 
 
@@ -65,9 +66,9 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.VGGNet().to(device)
-    trainer = T.SGDMC_Trainer(0.01, model, device)
+    trainer = T.SGDMC_Trainer_VGGNet(0.01, model, device)
 
-    patience = 5  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
+    patience = 3  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
 
     no_improvement_count = 0  # 개선이 없는 에포크 카운트
 
@@ -83,6 +84,7 @@ if __name__ == "__main__":
           no_improvement_count = 0
           best_eval_loss = loss_return
           torch.save(model.state_dict(), 'model_params_VGGNet.pth')
+          
         else:
           if loss_return >= best_eval_loss:
             no_improvement_count += 1

@@ -9,7 +9,7 @@ class SGDMC_Trainer:
         self.model = model
         self.device = device
         self.lossF = nn.CrossEntropyLoss()
-        self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr,momentum=0.99, weight_decay=0.0005)
+        self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr,momentum=0.99, weight_decay=0.0001)
 
     def step(self, image: torch.tensor, label: torch.tensor) -> float:
         x  = image.to(self.device)
