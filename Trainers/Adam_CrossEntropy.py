@@ -9,7 +9,7 @@ class AC_Trainer:
         self.model = model
         self.device = device
         self.lossF = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999), weight_decay=0.01)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999), weight_decay=0.00001)
 
     def step(self, image: torch.tensor, label: torch.tensor) -> float:
         x  = image.to(self.device)

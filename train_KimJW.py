@@ -25,8 +25,8 @@ else:
 
 # Global Data
 train_size = 49_000
-batch_size = 256
-epoch      = 10
+batch_size = 128
+epoch      = 100
 
 
 def train(loader, n_epoch):
@@ -42,18 +42,23 @@ def train(loader, n_epoch):
 
 
 def evaluate(loader, n_epoch):
-    correct = 0
-    model.eval()
+    with torch.no_grad():
+        correct = 0
+        model.eval()
+        evaluatelosssum = 0
+        result_pbar = tqdm(loader)
+        for image, label in result_pbar:
+            x = image.to(device)
+            y = label.to(device)
+            output = model.forward(x)
 
-    result_pbar = tqdm(loader)
-    for image, label in result_pbar:
-        x = image.to(device)
-        y = label.to(device)
-        output = model.forward(x)
-        result = torch.argmax(output, dim=1)
-        correct += batch_size - torch.count_nonzero(result - y)
-    print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 1000))
-    return correct
+            evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
+            result = torch.argmax(output, dim=1)
+            for res, ans in zip(result, y):
+                if res == ans:
+                    correct += 1
+        print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / (50000 - train_size)))
+    return evaluatelosssum
 
 
 
@@ -62,26 +67,42 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.MobileResNet().to(device)
-    trainer = T.AC_Trainer(0.001, model, device)
+    trainer = T.AC_Trainer(0.003, model, device)
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
+ 
+    patience = 3  # loss가 일정 에포크 동안 감소하지 않으면 lr decrease
+    
 
+    no_improvement_count = 0  # 개선이 없는 에포크 카운트
 
     if path.exists("./model_params_MobileResNet.pth"):
         model.load_state_dict(torch.load("./model_params_MobileResNet.pth"))
 
     prev = np.zeros(epoch, dtype=int)
+
     for i in range(epoch):
         train(train_load, i)
-        correct = evaluate(valid_load, i)
+        loss_return = evaluate(valid_load, i)
+        if i==0:
+            no_improvement_count = 0
+            best_eval_loss = loss_return
+        else:
+            if loss_return >= best_eval_loss:
+                no_improvement_count += 1
+            else:
+                no_improvement_count = 0
+                best_eval_loss = loss_return
 
-        prev[i] = correct
-        if i >= 2 and (prev[i] + prev[i - 2]) < (2 * prev[i - 1]):
-            print("LR Lowered!")
+        if no_improvement_count >= patience and trainer.lr >= 0.0001:
+            no_improvement_count = 0
             trainer.lr = trainer.lr * 0.8
-        elif i >= 2:
-            print("LR Doubled!")
-            trainer.lr = trainer.lr * 1.4
+            print("LR decreased")
+        elif no_improvement_count >= patience and trainer.lr < 0.001:
+            no_improvement_count = 0
+            break
+            print("LR Increased")
+
 
     with torch.no_grad():
         model.eval()
