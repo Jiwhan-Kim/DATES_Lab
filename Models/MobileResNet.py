@@ -53,23 +53,22 @@ class MobileResNet(nn.Module):
         super(MobileResNet, self).__init__()
         self.layer = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=64,
-                      kernel_size=3, stride=1, padding=1,
+                      kernel_size=5, stride=1, padding=2,
                       bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
             self.make_layer(64, 64, 1),     # 32  x w/2  x h/2
-            self.make_layer(64, 64, 1),
             self.make_layer(64, 128, 2),    # 64  x w/4  x h/4
             self.make_layer(128, 128, 1),
             self.make_layer(128, 256, 2),   # 128 x w/8  x h/8
             self.make_layer(256, 256, 1),
             self.make_layer(256, 512, 2),
-            self.make_layer(512, 512, 1),   # 256 x w/16 x w/16
-            nn.AdaptiveAvgPool2d(1)         # 512 x w/16 x h/16
+            self.make_layer(512, 512, 1),   # 512 x w/16 x w/16
+            self.make_layer(512, 512, 1),   # 512 x w/16 x h/16 
         )
 
-        self.fc = nn.Linear(512, 10)
+        self.fc = nn.Linear(2048, 10)
 
 
     def make_layer(self, in_channels, out_channels, stride):
