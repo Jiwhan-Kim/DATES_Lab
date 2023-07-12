@@ -26,7 +26,7 @@ else:
 # Global Data
 train_size = 40_000
 batch_size = 64
-epoch      = 100
+epoch      = 20
 
 
 def train(loader, n_epoch):
@@ -36,7 +36,6 @@ def train(loader, n_epoch):
     pbar = tqdm(loader)
     for image, label in pbar:
         x = image.to(device)
-        x = x - torch.mean(x)
         y = label.to(device)
         loss = trainer.step(x, y)
         pbar.set_description("Training Epoch %3d, %2.6f" % (n_epoch, loss))
@@ -50,12 +49,13 @@ def evaluate(loader, n_epoch):
       result_pbar = tqdm(loader)
       for image, label in result_pbar:
           x = image.to(device)
-          x = x - torch.mean(x)
           y = label.to(device)
           output = model.forward(x)
           evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
           result = torch.argmax(output, dim=1)
-          correct += batch_size - torch.count_nonzero(result - y)
+          for res, ans in zip(result, y):
+                if res == ans:
+                    correct += 1
       print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / (50000 - train_size)))
     return evaluatelosssum
 
@@ -66,7 +66,8 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.VGGNet().to(device)
-    trainer = T.SGDMC_Trainer(lr=0.01, momentum=0.99, weight_decay=0.0001, model=model, device=device)
+    trainer = T.AC_Trainer(lr=0.01, betas=(0.9, 0.999), weight_decay=0.0001, model=model, device=device)
+    # trainer = T.SGDMC_Trainer(lr=0.01, momentum=0.99, weight_decay=0.0001, model=model, device=device)
 
     patience = 3  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
 
@@ -108,7 +109,6 @@ if __name__ == "__main__":
         result_pbar = tqdm(test_load)
         for image, label in result_pbar:
             x = image.to(device)
-            x = x - torch.mean(x)
             y = label.to(device)
             output = model.forward(x)
             result = torch.argmax(output, dim=1)
