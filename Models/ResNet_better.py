@@ -47,7 +47,6 @@ class ResNet_better(nn.Module):
         self.fc = nn.Linear(1*1*512, 10)
 
 
-
     def make_layer(self, in_channels, out_channels, stride):
         layers=[]
         if stride == 1:
