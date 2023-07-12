@@ -1,3 +1,4 @@
 from .Adam_CrossEntropy import AC_Trainer
 from .SGDMomentum_CrossEntropy import SGDMC_Trainer_ResNet
 from .SGDMomentum_CrossEntropy import SGDMC_Trainer_VGGNet
+from .SGDMomentum_CrossEntropy import SGDMC_Trainer_Inception_Jun

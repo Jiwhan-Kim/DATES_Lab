@@ -64,7 +64,7 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.MobileNet().to(device)
-    trainer = T.AC_Trainer(0.001, model, device)
+    trainer = T.AC_Trainer(lr=0.001, betas=(0.9, 0.999), weight_decay=0.001, model=model, device=device)
 
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
