@@ -29,9 +29,18 @@ class BasicBlock(nn.Module):
                 nn.ReLU()
             )
         
+        def conv(in_size, out_size, stride):
+            return nn.Sequential(
+                nn.Conv2d(in_channels=in_size, out_channels=out_size,
+                          kernel_size=3, stride=stride, padding=1,
+                          bias=False),
+                nn.BatchNorm2d(out_size),
+                nn.ReLU()
+            )
+        
         self.block = nn.Sequential(
-            conv_res_dw(in_channels, out_channels, stride),
-            conv_res_dw(out_channels, out_channels, 1),
+            conv(in_channels, out_channels, stride),
+            conv(out_channels, out_channels, 1),
         )
 
         self.shortcut = nn.Sequential() if stride == 1 else nn.Sequential(

@@ -19,10 +19,10 @@ batch_size = 64
 
 if __name__ == "__main__":
     print("running test.py")
-    model   = M.ResNet_better().to(device)
+    model   = M.MobileResNet().to(device)
     _, _, test_load = D.Load_CIFAR10(train_size, batch_size)
-    if path.exists("./model_params_ResNet_better.pth"):
-        model.load_state_dict(torch.load("./model_params_ResNet_better.pth"))
+    if path.exists("./model_params_MobileResNet.pth"):
+        model.load_state_dict(torch.load("./model_params_MobileResNet.pth"))
     else:
       print("run train first!")
       exit(0)
