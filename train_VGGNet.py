@@ -26,7 +26,7 @@ else:
 # Global Data
 train_size = 40_000
 batch_size = 64
-epoch      = 20
+epoch      = 100
 
 
 def train(loader, n_epoch):
@@ -54,7 +54,7 @@ def evaluate(loader, n_epoch):
           evaluatelosssum = evaluatelosssum + torch.nn.CrossEntropyLoss()(output, y)
           result = torch.argmax(output, dim=1)
           correct += batch_size - torch.count_nonzero(result - y)
-      print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / 10000))
+      print("Epoch {}. Accuracy: {}".format(n_epoch, 100 * correct / (50000 - train_size)))
     return evaluatelosssum
 
 
@@ -64,9 +64,9 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
 
     model   = M.VGGNet().to(device)
-    trainer = T.SGDMC_Trainer(0.001, model, device)
+    trainer = T.SGDMC_Trainer(lr=0.01, momentum=0.99, weight_decay=0.0001, model=model, device=device)
 
-    lr_patience = 5  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
+    patience = 3  # 검증 손실이 일정 에포크 동안 감소하지 않으면 lr decrease
 
     no_improvement_count = 0  # 개선이 없는 에포크 카운트
 
@@ -79,19 +79,23 @@ if __name__ == "__main__":
         train(train_load, i)
         loss_return = evaluate(valid_load, i)
         if i==0:
-          no_improvement_count = 0
-          best_eval_loss = loss_return
-          
+           no_improvement_count = 0
+           best_eval_loss = loss_return
         else:
           if loss_return >= best_eval_loss:
             no_improvement_count += 1
           else:
             no_improvement_count = 0
             best_eval_loss = loss_return
-        if no_improvement_count >= lr_patience:
-            trainer.lr = trainer.lr / 10
-            no_improvement_count = 0
-            print("LR decrease")
+            
+        if no_improvement_count >= patience:
+          no_improvement_count = 0
+          if trainer.optimizer.param_groups[0]['lr'] > 0.001:
+              trainer.optimizer.param_groups[0]['lr'] /= 10
+              print("LR decreased")
+          else:
+              print("no improvement")
+              break
 
 
     with torch.no_grad():

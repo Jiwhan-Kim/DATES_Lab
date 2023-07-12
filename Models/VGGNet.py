@@ -54,10 +54,13 @@ class VGGNet(nn.Module):
         self.fc = nn.Sequential(
           nn.Linear(1*1*512, 256),
           nn.ReLU(),
+          nn.Dropout(0.5),  # Dropout added
           nn.Linear(256, 256),
           nn.ReLU(),
+          nn.Dropout(0.5),  # Dropout added
           nn.Linear(256, 10)
         )
+
 
     def forward(self, x):
 

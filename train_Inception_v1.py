@@ -67,8 +67,8 @@ if __name__ == "__main__":
     print("running train.py")
     print("Device on Working: ", device)
     torch.cuda.empty_cache()
-    model   = M.ResNet().to(device)
-    trainer = T.SGDMC_Trainer(lr=0.01, momentum=0.91, weight_decay=0.000125, model=model, device=device)
+    model   = M.Inception_v1().to(device)
+    trainer = T.SGDMC_Trainer(lr=0.15, momentum=0.9, weight_decay=0.0001, model=model, device=device)
  
     patience = 3  # loss가 일정 에포크 동안 감소하지 않으면 lr decrease
     
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
 
     if path.exists("./model_params_ResNet.pth"):
-        model.load_state_dict(torch.load("./model_params_ResNet.pth"))
+        model.load_state_dict(torch.load("./model_params_Inception_v1.pth"))
 
 
     for i in range(epoch):
@@ -96,7 +96,7 @@ if __name__ == "__main__":
             
         if no_improvement_count >= patience:
           no_improvement_count = 0
-          if trainer.optimizer.param_groups[0]['lr'] > 0.001:
+          if trainer.optimizer.param_groups[0]['lr'] > 0.00015:
               trainer.optimizer.param_groups[0]['lr'] /= 10
               print("LR decreased")
           else:
@@ -104,6 +104,7 @@ if __name__ == "__main__":
               break
 
     with torch.no_grad():
+        model.load_state_dict(torch.load("./model_params_Inception_v1.pth"))
         model.eval()
         val = np.zeros(10, dtype=int)
         correct = 0
@@ -123,6 +124,5 @@ if __name__ == "__main__":
         print("Final Accuracy: {}\n\n".format(100 * correct / 10000))
         for i in range(10):
             print("class {}: {} / 1000".format(i, val[i]))
-    torch.save(model.state_dict(), 'model_params_ResNet.pth')
 
     
