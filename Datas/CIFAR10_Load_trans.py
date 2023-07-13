@@ -20,11 +20,9 @@ def Load_CIFAR10_trans(n_train, batch_size):
     n_eval = 50000 - n_train
     train_ds, valid_ds = random_split(trainset, [n_train, n_eval])
 
-    train_load = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
-    valid_load = DataLoader(valid_ds, batch_size=batch_size, shuffle=False)
-    test_load = DataLoader(testset, batch_size=batch_size, shuffle=False)
+    train_load = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=4)
+    valid_load = DataLoader(valid_ds, batch_size=batch_size, shuffle=False, num_workers=4)
+    test_load = DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     print("Data Loading Completed")
     return train_load, valid_load, test_load
-
-

@@ -25,8 +25,8 @@ else:
 
 # Global Data
 train_size = 49_000
-batch_size = 64
-epoch      = 25
+batch_size = 128
+epochs     = 20
 
 
 def train(loader, n_epoch):
@@ -62,19 +62,23 @@ if __name__ == "__main__":
     print("running train.py")
     print("Device on Working: ", device)
 
-    model   = M.MobileResNet().to(device)
-    trainer = T.AC_Trainer(lr=0.003, betas=(0.9, 0.999), weight_decay=0.0001, model=model, device=device)
-
     train_load, valid_load, test_load = D.Load_CIFAR10_trans(train_size, batch_size)
+
+    model   = M.MobileResNet().to(device)
+    trainer = T.AC_Trainer(model=model, device=device, max_lr=0.01, betas=(0.9, 0.999), weight_decay=0.0001,
+                           epochs=epochs, train_load=train_load, grad_clip=0.1)
+
+    
 
     if path.exists("./model_params_MobileResNet.pth"):
         model.load_state_dict(torch.load("./model_params_MobileResNet.pth"))
 
-    prev = np.zeros(epoch, dtype=int)
+    prev = np.zeros(epochs, dtype=int)
 
-    for i in range(epoch):
+    for i in range(epochs):
         train(train_load, i)
         evaluate(valid_load, i)
+        print("Current Learning Rate", trainer.get_lr())
 
 
     with torch.no_grad():

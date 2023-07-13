@@ -39,8 +39,8 @@ class BasicBlock(nn.Module):
             )
         
         self.block = nn.Sequential(
-            conv(in_channels, out_channels, stride),
-            conv(out_channels, out_channels, 1),
+            conv_res_dw(in_channels, out_channels, stride),
+            conv_res_dw(out_channels, out_channels, 1),
         )
 
         self.shortcut = nn.Sequential() if stride == 1 else nn.Sequential(
