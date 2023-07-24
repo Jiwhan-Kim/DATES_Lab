@@ -14,15 +14,15 @@ elif torch.cuda.is_available():
 else:
     device = "cpu"
 
-train_size = 10000
-batch_size = 64
+train_size = 40000
+batch_size = 128
 
 if __name__ == "__main__":
     print("running test.py")
-    model   = M.ResNet_better().to(device)
+    model   = M.MobileResNet().to(device)
     _, _, test_load = D.Load_CIFAR10(train_size, batch_size)
-    if path.exists("./model_params_ResNet_better.pth"):
-        model.load_state_dict(torch.load("./model_params_ResNet_better.pth"))
+    if path.exists("./MobileResNet85.50.pth"):
+        model.load_state_dict(torch.load("./MobileResNet85.50.pth"))
     else:
       print("run train first!")
       exit(0)
