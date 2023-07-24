@@ -4,14 +4,14 @@ import torch.optim as optim
 
 
 class SGDMC_Trainer:
-    def __init__(self, lr, momentum, weight_decay, model, device):
-        self.lr = lr
-        self.momentum = momentum
-        self.weight_decay = weight_decay
+    def __init__(self, max_lr, momentum, weight_decay, model, device, epochs, train_load, grad_clip=None):
         self.model = model
         self.device = device
+        self.grad_clip = grad_clip
         self.lossF = nn.CrossEntropyLoss()
-        self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay)
+        self.optimizer = optim.SGD(self.model.parameters(), lr=max_lr, momentum=momentum, weight_decay=weight_decay)
+        self.scheduler = optim.lr_scheduler.OneCycleLR(optimizer=self.optimizer, max_lr=max_lr, epochs=epochs,
+                                                       steps_per_epoch=len(train_load))
 
     def step(self, image: torch.tensor, label: torch.tensor) -> float:
         x  = image.to(self.device)
@@ -20,5 +20,14 @@ class SGDMC_Trainer:
         output = self.model.forward(x)
         loss = self.lossF(output, y)
         loss.backward()
+
+        if self.grad_clip:
+            nn.utils.clip_grad_value_(self.model.parameters(), self.grad_clip)
+        
         self.optimizer.step()
-        return loss
+        self.scheduler.step()
+
+    def get_lr(self):
+        for param_group in self.optimizer.param_groups:
+            return param_group['lr']
+        pass

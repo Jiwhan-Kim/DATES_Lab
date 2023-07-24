@@ -26,7 +26,6 @@ class AC_Trainer:
 
         self.optimizer.step()
         self.scheduler.step()
-        return loss
     
     def get_lr(self):
         for param_group in self.optimizer.param_groups:
