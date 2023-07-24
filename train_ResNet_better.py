@@ -68,7 +68,7 @@ if __name__ == "__main__":
     print("Device on Working: ", device)
     torch.cuda.empty_cache()
     model   = M.ResNet_better().to(device)
-    trainer = T.SGDMC_Trainer(lr=0.01, momentum=0.92, weight_decay=0.00013, model=model, device=device)
+    trainer = T.SGDMC_Trainer(lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device)
  
     patience = 3  # loss가 일정 에포크 동안 감소하지 않으면 lr decrease
     

@@ -96,7 +96,7 @@ if __name__ == "__main__":
             
         if no_improvement_count >= patience:
           no_improvement_count = 0
-          if trainer.optimizer.param_groups[0]['lr'] > 0.00015:
+          if trainer.optimizer.param_groups[0]['lr'] > 0.0015:
               trainer.optimizer.param_groups[0]['lr'] /= 10
               print("LR decreased")
           else:
