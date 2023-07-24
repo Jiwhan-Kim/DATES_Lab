@@ -26,12 +26,12 @@ else:
 model_numbering = {
     "0": "VGGNet",
     "1": "ResNet",
-    "2": "M.ResNet_better",
-    "3": "M.ResNet_better_dropout",
-    "4": "M.Inception_v1",
-    "5": "M.Inception_v1_better",
-    "6": "M.MobileNet",
-    "7": "M.MobileResNet"
+    "2": "ResNet_better",
+    "3": "ResNet_better_dropout",
+    "4": "Inception_v1",
+    "5": "Inception_v1_better",
+    "6": "MobileNet",
+    "7": "MobileResNet"
 }
 
 model_mapping = {
