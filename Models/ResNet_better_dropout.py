@@ -5,7 +5,8 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         self.bn1 = nn.BatchNorm2d(in_channels)
         self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=stride, padding=1, bias=False) # stride = 1 or 2
-        
+        self.dropout = nn.Dropout2d(0.3) # dropout ratio 0.3
+
         self.bn2 = nn.BatchNorm2d(out_channels)
         self.conv2 = nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1, bias=False)
         
@@ -24,6 +25,7 @@ class BasicBlock(nn.Module):
         out = self.bn1(x)
         out = nn.ReLU()(out)
         out = self.conv1(out)
+        out = self.dropout(out)
 
         out = self.bn2(out)
         out = nn.ReLU()(out)
@@ -33,9 +35,9 @@ class BasicBlock(nn.Module):
 
         return out
 
-class ResNet_better(nn.Module):
+class ResNet_better_dropout(nn.Module):
     def __init__(self):
-        super(ResNet_better, self).__init__()
+        super(ResNet_better_dropout, self).__init__()
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1, bias=False)
         
 
@@ -60,8 +62,6 @@ class ResNet_better(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        
-        
         x = nn.MaxPool2d(2, 2)(x)
 
         x = self.layer1(x)
