@@ -45,7 +45,7 @@ class ResNet_better(nn.Module):
         self.layer4 = self.make_layer(256, 512, 2)
         self.bn = nn.BatchNorm2d(512)
 
-        self.fc = nn.Linear(1*1*512, 10)
+        self.fc = nn.Linear(2*2*512, 10)
 
 
     def make_layer(self, in_channels, out_channels, stride):
@@ -70,8 +70,6 @@ class ResNet_better(nn.Module):
         x = self.layer4(x)
         x = self.bn(x)
         x = nn.ReLU()(x)
-
-        x = nn.MaxPool2d(2, 2)(x)
 
         x = x.view(x.shape[0], -1)
         x = self.fc(x)

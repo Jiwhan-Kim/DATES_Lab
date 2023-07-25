@@ -48,7 +48,7 @@ model_mapping = {
 
 # Global Data
 train_size = 40_000
-batch_size = 64
+batch_size = 128
 epochs     = 20
 
 
@@ -95,17 +95,17 @@ if __name__ == "__main__":
     model   = model_mapping[ChooseModel]().to(device)
 
     if ChooseModel == "VGGNet":
-        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.99, weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.99, weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "ResNet":
-        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "ResNet_better":
-        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "ResNet_better_dropout":
-        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.00015, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.00015, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "Inception_v1":
-        trainer = T.SGDMC_Trainer(max_lr=0.015, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.015, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "Inception_v1_better":
-        trainer = T.SGDMC_Trainer(max_lr=0.015, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.015, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "MobileNet":
         trainer = T.AC_Trainer(max_lr=0.001, betas=(0.9, 0.999), weight_decay=0.001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
     elif ChooseModel == "MobileResNet":

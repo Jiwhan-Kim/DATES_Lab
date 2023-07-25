@@ -55,9 +55,19 @@ class BasicBlock(nn.Module):
 class Inception_v1_better(nn.Module):
     def __init__(self):
         super(Inception_v1_better, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=7, stride=2, padding=3)
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=1, stride=1)
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=192, kernel_size=3, stride=1, padding=1)
+        self.layer0 = nn.Sequential(
+            nn.Conv2d(in_channels=3, out_channels=64, kernel_size=7, stride=2, padding=3, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d((3, 3), stride=2, padding=1),
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=1, stride=1, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=64, out_channels=192, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(192),
+            nn.ReLU()
+        )
+        
 
         self.layer3a = BasicBlock(in_channels=192, stride=1, out1x1=64, reduce3x3=96, out3x3=128, reducedouble3x3=16, outdouble3x3=32, out1x1pool=32) # 3a
         self.layer3b = BasicBlock(in_channels=256, stride=2, out1x1=128, reduce3x3=128, out3x3=192, reducedouble3x3=32, outdouble3x3=96, out1x1pool=64) # 3b
@@ -74,21 +84,8 @@ class Inception_v1_better(nn.Module):
 
         self.fc = nn.Linear(1*1*1024, 10)
 
-
-
-
     def forward(self, x):
-        x = self.conv1(x)
-        x = nn.BatchNorm2d(64)(x)
-        x = nn.ReLU()(x)
-        x = nn.MaxPool2d((3, 3), stride=2, padding=1)(x)
-
-        x = self.conv2(x)
-        x = nn.BatchNorm2d(64)(x)
-        x = nn.ReLU()(x)
-        x = self.conv3(x)
-        x = nn.BatchNorm2d(192)(x)
-        x = nn.ReLU()(x)
+        x = self.layer0(x)
 
         x = self.layer3a(x)
         x = self.layer3b(x)
