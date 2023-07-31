@@ -31,7 +31,8 @@ model_numbering = {
     "4": "Inception_v1",
     "5": "Inception_v1_better",
     "6": "MobileNet",
-    "7": "MobileResNet"
+    "7": "MobileResNet",
+    "8": "Transformer"
 }
 
 model_mapping = {
@@ -42,7 +43,8 @@ model_mapping = {
     "Inception_v1": M.Inception_v1,
     "Inception_v1_better": M.Inception_v1_better,
     "MobileNet": M.MobileNet,
-    "MobileResNet": M.MobileResNet
+    "MobileResNet": M.MobileResNet,
+    "Transformer": M.Transformer
 }
 
 
@@ -83,9 +85,9 @@ if __name__ == "__main__":
     
     print("running train.py")
     print("Device on Working: ", device)
-    train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
+    train_load, valid_load, test_load = D.Load_CIFAR10_trans(train_size, batch_size)
     print("Choose Model:")
-    print("VGGNet(0)   ResNet(1)   ResNet_better(2)   ResNet_better_dropout(3)   Inception_v1(4)   Inception_v1_better(5)   MobileNet(6)   MobileResNet(7)")
+    print("VGGNet(0)   ResNet(1)   ResNet_better(2)   ResNet_better_dropout(3)   Inception_v1(4)   Inception_v1_better(5)   MobileNet(6)   MobileResNet(7)  Transformer(8)")
     InputString = input()
     if InputString.isdigit() == True:
       ChooseModel = model_numbering[InputString]
@@ -109,6 +111,8 @@ if __name__ == "__main__":
     elif ChooseModel == "MobileNet":
         trainer = T.AC_Trainer(max_lr=0.001, betas=(0.9, 0.999), weight_decay=0.001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
     elif ChooseModel == "MobileResNet":
+        trainer = T.AC_Trainer(max_lr=0.01, betas=(0.9, 0.999), weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+    elif ChooseModel == "Transformer":
         trainer = T.AC_Trainer(max_lr=0.01, betas=(0.9, 0.999), weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
  
     
