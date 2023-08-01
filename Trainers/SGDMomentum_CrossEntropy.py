@@ -4,11 +4,11 @@ import torch.optim as optim
 
 
 class SGDMC_Trainer:
-    def __init__(self, max_lr, momentum, weight_decay, model, device, epochs, train_load, grad_clip=None):
+    def __init__(self, max_lr, momentum, weight_decay, model, device, epochs, train_load, label_smoothing=0, grad_clip=None):
         self.model = model
         self.device = device
         self.grad_clip = grad_clip
-        self.lossF = nn.CrossEntropyLoss()
+        self.lossF = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
         self.optimizer = optim.SGD(self.model.parameters(), lr=max_lr, momentum=momentum, weight_decay=weight_decay)
         self.scheduler = optim.lr_scheduler.OneCycleLR(optimizer=self.optimizer, max_lr=max_lr, epochs=epochs, steps_per_epoch=len(train_load))
 

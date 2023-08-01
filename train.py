@@ -113,7 +113,7 @@ if __name__ == "__main__":
     elif ChooseModel == "MobileResNet":
         trainer = T.AC_Trainer(max_lr=0.01, betas=(0.9, 0.999), weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
     elif ChooseModel == "Transformer":
-        trainer = T.AC_Trainer(max_lr=0.01, betas=(0.9, 0.999), weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.005, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load, label_smoothing=0.01)
  
     
     model_params_file = f"./model_params_{ChooseModel}.pth"
