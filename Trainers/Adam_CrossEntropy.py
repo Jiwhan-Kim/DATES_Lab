@@ -4,14 +4,13 @@ import torch.optim as optim
 
 
 class AC_Trainer:
-    def __init__(self, model, device, max_lr, betas, weight_decay, epochs, train_load, grad_clip=None):
+    def __init__(self, model, device, max_lr, betas, weight_decay, epochs, train_load, label_smoothing=0, grad_clip=None):
         self.model = model
         self.device = device
         self.grad_clip = grad_clip
-        self.lossF = nn.CrossEntropyLoss()
+        self.lossF = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
         self.optimizer = optim.Adam(self.model.parameters(),lr=max_lr, betas=betas, weight_decay=weight_decay)
-        self.scheduler = optim.lr_scheduler.OneCycleLR(optimizer=self.optimizer, max_lr=max_lr, epochs=epochs,
-                                                       steps_per_epoch=len(train_load))
+        self.scheduler = optim.lr_scheduler.OneCycleLR(optimizer=self.optimizer, max_lr=max_lr, epochs=epochs, steps_per_epoch=len(train_load))
 
     def step(self, image: torch.tensor, label: torch.tensor) -> float:
         x  = image.to(self.device)

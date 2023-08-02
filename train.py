@@ -31,7 +31,8 @@ model_numbering = {
     "4": "Inception_v1",
     "5": "Inception_v1_better",
     "6": "MobileNet",
-    "7": "MobileResNet"
+    "7": "MobileResNet",
+    "8": "Transformer"
 }
 
 model_mapping = {
@@ -42,13 +43,14 @@ model_mapping = {
     "Inception_v1": M.Inception_v1,
     "Inception_v1_better": M.Inception_v1_better,
     "MobileNet": M.MobileNet,
-    "MobileResNet": M.MobileResNet
+    "MobileResNet": M.MobileResNet,
+    "Transformer": M.Transformer
 }
 
 
 # Global Data
 train_size = 40_000
-batch_size = 64
+batch_size = 128
 epochs     = 20
 
 
@@ -83,9 +85,9 @@ if __name__ == "__main__":
     
     print("running train.py")
     print("Device on Working: ", device)
-    train_load, valid_load, test_load = D.Load_CIFAR10(train_size, batch_size)
+    train_load, valid_load, test_load = D.Load_CIFAR10_trans(train_size, batch_size)
     print("Choose Model:")
-    print("VGGNet(0)   ResNet(1)   ResNet_better(2)   ResNet_better_dropout(3)   Inception_v1(4)   Inception_v1_better(5)   MobileNet(6)   MobileResNet(7)")
+    print("VGGNet(0)   ResNet(1)   ResNet_better(2)   ResNet_better_dropout(3)   Inception_v1(4)   Inception_v1_better(5)   MobileNet(6)   MobileResNet(7)  Transformer(8)")
     InputString = input()
     if InputString.isdigit() == True:
       ChooseModel = model_numbering[InputString]
@@ -95,21 +97,23 @@ if __name__ == "__main__":
     model   = model_mapping[ChooseModel]().to(device)
 
     if ChooseModel == "VGGNet":
-        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.99, weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.99, weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "ResNet":
-        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "ResNet_better":
-        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.000125, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "ResNet_better_dropout":
-        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.00015, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.01, momentum=0.92, weight_decay=0.00015, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "Inception_v1":
-        trainer = T.SGDMC_Trainer(max_lr=0.015, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.015, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "Inception_v1_better":
-        trainer = T.SGDMC_Trainer(max_lr=0.015, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+        trainer = T.SGDMC_Trainer(max_lr=0.015, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load)
     elif ChooseModel == "MobileNet":
         trainer = T.AC_Trainer(max_lr=0.001, betas=(0.9, 0.999), weight_decay=0.001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
     elif ChooseModel == "MobileResNet":
         trainer = T.AC_Trainer(max_lr=0.01, betas=(0.9, 0.999), weight_decay=0.0001, model=model, device=device, epochs=epochs, train_load=train_load, grad_clip=0.1)
+    elif ChooseModel == "Transformer":
+        trainer = T.SGDMC_Trainer(max_lr=0.005, momentum=0.9, weight_decay=0.00001, model=model, device=device, epochs=epochs, train_load=train_load, label_smoothing=0.01)
  
     
     model_params_file = f"./model_params_{ChooseModel}.pth"

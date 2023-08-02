@@ -42,9 +42,7 @@ class ResNet(nn.Module):
         self.layer3 = self.make_layer(128, 256, 2)
         self.layer4 = self.make_layer(256, 512, 2)
 
-        self.fc = nn.Linear(1*1*512, 10)
-        # Initialize the weights using Kaiming initialization for the fully connected layer
-        nn.init.kaiming_uniform_(self.fc.weight, mode='fan_in', nonlinearity='relu')
+        self.fc = nn.Linear(2*2*512, 10)
 
 
     def make_layer(self, in_channels, out_channels, stride):
@@ -68,8 +66,6 @@ class ResNet(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-
-        x = nn.MaxPool2d(2, 2)(x)
 
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
